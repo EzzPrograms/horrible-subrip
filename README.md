@@ -1,4 +1,4 @@
-# HorribleSubs Subtitle Ripper
+# HorribleSubs Subtitle Ripper [![CodeFactor](https://www.codefactor.io/repository/github/ezzprograms/horrible-subrip/badge)](https://www.codefactor.io/repository/github/ezzprograms/horrible-subrip)
 Rips SRT files from HorribleSubs and optionally converts them for Super Netflix usage.
 Also includes a tool script for:
 - Subtitle Offsets
