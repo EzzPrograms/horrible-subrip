@@ -3,15 +3,13 @@ import sys
 import shutil
 from pycaption import SRTReader, DFXPWriter
 from pathlib import Path
+from subprocess import call
 import pysubs2
 
 
 # Screen Clear
 def clear():
-    if os.name == "nt":
-        _ = os.system("cls")
-    else:
-        _ = os.system("clear")
+    _ = call('clear' if os.name =='posix' else 'cls')
 
 
 # Y/N Question (Default No)
@@ -19,11 +17,10 @@ def ynask(text):
     ans = str(input(text + " (y/N): ")).lower().strip()
     if ans[:1] == 'y':
         return True
-    elif ans[:1] == 'n':
+    if ans[:1] == 'n':
         return False
-    else:
-        print("Defaulting to No.")
-        return False
+    print("Defaulting to No.")
+    return False
 
 
 def dfxpconv(filename=str, ckeep=bool):
@@ -57,21 +54,16 @@ def dfxpconv(filename=str, ckeep=bool):
     fdfxp.close()
     if ckeep:
         return
-    else:
+    if not ckeep:
         os.remove(filename)
         return
 
 
-def getsubfile(filetype=".srt"):
-    # Will give a prompt for the user to choose the sub file.
-    # Current file formats can be given in ".XXX" as an argument to filter file formats.
-    multi = False
+def getdir():
     subfold = False
     condir = False
+    currdir = ""
     dirlist = []
-    filelist = []
-    fileout = []
-    filenum = 1
 
     if Path("subs").is_dir():
         subfold = True
@@ -80,13 +72,16 @@ def getsubfile(filetype=".srt"):
     print("2. Custom Directory")
     if subfold:
         print("3. \"subs\" Directory")
+
     while True:
         if condir:
             break
         foldopt = input("Choose a directory: ")
-        if foldopt == "1" or (foldopt == "3" and subfold):
-            break
-        elif foldopt == "2":
+        if foldopt == "1":
+            return "", "1"
+        if foldopt == "3" and subfold:
+            return "subs/", "3"
+        if foldopt == "2":
             print("Custom Directory List:")
             rootdir = os.listdir(os.getcwd())
             i = 1
@@ -100,23 +95,7 @@ def getsubfile(filetype=".srt"):
                     continue
             i = 1
             cdir = input("Choose a directory: ")
-            currdir = dirlist[int(cdir) - 1] + "/"
-            ldir = os.listdir(currdir)
-            dirlist = []
-            for odir in ldir:
-                if Path(currdir + odir).is_dir():
-                    dirlist.append(odir)
-                    print(str(i) + ". " + odir)
-                    i += 1
-                    continue
-                else:
-                    continue
             while True:
-                i = 1
-                cdir = input("Choose a directory (Press Y to confirm current directory): ")
-                if cdir.lower() == "y":
-                    condir = True
-                    break
                 currdir = currdir + dirlist[int(cdir) - 1] + "/"
                 ldir = os.listdir(currdir)
                 dirlist = []
@@ -128,14 +107,31 @@ def getsubfile(filetype=".srt"):
                         continue
                     else:
                         continue
+                i = 1
+                cdir = input("Choose a directory (Press Y to confirm current directory): ")
+                if cdir.lower() == "y":
+                    return currdir, foldopt
+
+
+def getsubfile(filetype=".srt"):
+    # Will give a prompt for the user to choose the sub file.
+    # Current file formats can be given in ".XXX" as an argument to filter file formats.
+    multi = False
+    filelist = []
+    fileout = []
+    filenum = 1
+
+    currdir, foldopt = getdir()
 
     print("Detected Subtitles: ")
     if foldopt == "1":
+        outdir = ""
         currdir = os.listdir(os.getcwd())
     if foldopt == "2":
         outdir = currdir
         currdir = os.listdir(currdir)
     elif foldopt == "3":
+        outdir = "subs/"
         currdir = os.listdir("subs")
     for file in currdir:
         if file.endswith(filetype) and not Path(outdir + file).is_dir():
@@ -156,24 +152,13 @@ def getsubfile(filetype=".srt"):
                 fileout.append(filelist[fileopt])
             elif foldopt == "3":
                 fileout.append("subs/" + filelist[fileopt])
-        if foldopt == "1":
-            return fileout, multi, ""
-        if foldopt == "2":
-            return fileout, multi, outdir
-        elif foldopt == "3":
-            return fileout, multi, "subs/"
     else:
         fileopt = int(fileopt) - 1
         fileout.append(filelist[fileopt])
-        if foldopt == "1":
-            return fileout, multi, ""
-        if foldopt == "2":
-            return fileout, multi, outdir
-        elif foldopt == "3":
-            return fileout, multi, "subs/"
+    return fileout, multi, outdir
 
 
-def main():
+if __name__ == "__main__":
     print("Subtitle Tools")
     print("Menu:")
     print("1. Sync SRT Time")
@@ -234,7 +219,3 @@ def main():
             print("All ASS files has been converted to SRT files.")
     elif action == "0":
         sys.exit()
-
-
-if __name__ == "__main__":
-    main()

@@ -12,7 +12,7 @@ dfxp = False
 multi = False
 
 
-def main():
+if __name__ == "__main__":
     # User Input
     clear()
     print("HorribleSubs SRT Downloader")
@@ -64,10 +64,10 @@ def main():
             break
         else:
             break
-    dir = os.getcwd() + "\\temp"
+    direct = os.getcwd() + "\\temp"
     try:
-        os.mkdir(dir)
-    except:
+        os.mkdir(direct)
+    except OSError:
         deltemp = ynask("\"temp\" folder detected! Do you want to delete it?")
         if deltemp:
             print("Deleting the \"temp\" folder.")
@@ -77,7 +77,7 @@ def main():
             sys.exit()
 
     # Download a 480p of the video(s)
-    subprocess.call(["horrible-downloader", "-d", anime, "-e", episode, "-r", "480", "-o", dir])
+    subprocess.call(["horrible-downloader", "-d", anime, "-e", episode, "-r", "480", "-o", direct])     # nosec
 
     # Check for the video files that horrible-downloader made.
     aniname = os.listdir("temp")
@@ -159,7 +159,3 @@ def main():
                 print("Deleting SRT file after conversion.")
                 dfxpconv(aniname[0] + " Episode " + realep + ".srt", False)
                 print("Converted to DFXP. DFXP file is at: " + aniname[0] + " Episode " + realep + ".dfxp")
-
-
-if __name__ == "__main__":
-    main()
