@@ -9,7 +9,7 @@ import pysubs2
 
 # Screen Clear
 def clear():
-    _ = call('clear' if os.name =='posix' else 'cls')
+    _ = call('clear' if os.name == 'posix' else 'cls', shell=True)
 
 
 # Y/N Question (Default No)
@@ -24,9 +24,9 @@ def ynask(text):
 
 
 def dfxpconv(filename=str, ckeep=bool):
-    fsrt = open(filename, "r")
+    fsrt = open(filename, "r", encoding='utf-8', errors='ignore')
     srtcont = fsrt.read()
-    fdfxp = open(filename.replace(".srt", ".dfxp"), "w")
+    fdfxp = open(filename.replace(".srt", ".dfxp"), "wb")
 
     # Super Netflix Compatibility
     # Converter that is used (DFXPWriter) uses a different set of rules
@@ -49,6 +49,7 @@ def dfxpconv(filename=str, ckeep=bool):
     dfxpedit = dfxpedit.replace("&lt;/i&gt;", "")
     dfxpedit = dfxpedit.replace("{\\an8}", "")
 
+    dfxpedit = dfxpedit.encode('utf-8', errors='replace')
     fdfxp.write(dfxpedit)
     fsrt.close()
     fdfxp.close()
@@ -210,12 +211,12 @@ if __name__ == "__main__":
         files, multi, folder = getsubfile(".ass")
         if not multi:
             subs = pysubs2.load(folder + files[0])
-            subs.save(path=folder + files[0].replace(".ass", ".srt"), format="srt")
+            subs.save(path=folder + files[0].replace(".ass", ".srt"), format="srt", encoding='utf-8')
             print("ASS file is converted to SRT file at: " + folder + files[0].replace(".ass", ".srt"))
         elif multi:
             for file in files:
                 subs = pysubs2.load(folder + file)
-                subs.save(path=folder + file.replace(".ass", ".srt"), format="srt")
+                subs.save(path=folder + file.replace(".ass", ".srt"), format="srt", encoding='utf-8')
             print("All ASS files has been converted to SRT files.")
     elif action == "0":
         sys.exit()
